@@ -32,6 +32,12 @@ class GameBloc extends Bloc<GameEvent, GameBlocState> {
         ? currentState.userScore
         : currentState.userScore + userChoice;
 
+    // Update runs history - only add the run if user is not out
+    List<int> updatedRunsHistory = List.from(currentState.runsHistory);
+    if (!isUserOut) {
+      updatedRunsHistory.add(userChoice);
+    }
+
     final updatedState = currentState.copyWith(
       userChoice: userChoice,
       botChoice: botChoice,
@@ -39,6 +45,7 @@ class GameBloc extends Bloc<GameEvent, GameBlocState> {
       ballsPlayed: newBallsPlayed,
       isUserOut: isUserOut,
       isGameOver: _gameRepository.checkIsGameOver(newBallsPlayed, isUserOut),
+      runsHistory: updatedRunsHistory,
     );
 
     emit(GameInProgress(updatedState));

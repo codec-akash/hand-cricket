@@ -7,6 +7,7 @@ import 'package:hand_cricke/presentation/bloc/game_bloc/game_state.dart';
 import 'package:hand_cricke/utils/image_path.dart';
 import 'package:hand_cricke/utils/image_provider.dart';
 import 'package:hand_cricke/widgets/run_buttons.dart';
+import 'package:hand_cricke/widgets/score_card.dart';
 import 'package:rive/rive.dart';
 import 'package:hand_cricke/widgets/game_timer.dart';
 
@@ -221,6 +222,7 @@ class _GameMainState extends State<GameMain> {
 
                       return Column(
                         children: [
+                          ScoreCard(runsHistory: gameState.runsHistory),
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),

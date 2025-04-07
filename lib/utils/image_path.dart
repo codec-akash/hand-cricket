@@ -6,6 +6,7 @@ class ImagePath {
   static const String four = 'assets/images/four.png';
   static const String five = 'assets/images/five.png';
   static const String six = 'assets/images/six.png';
+  static const String ball = 'assets/images/ball.png';
 }
 
 class RivePath {

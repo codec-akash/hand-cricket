@@ -7,6 +7,7 @@ class GameState extends Equatable {
   final int botChoice;
   final bool isUserOut;
   final bool isGameOver;
+  final List<int> runsHistory;
 
   const GameState({
     this.userScore = 0,
@@ -15,6 +16,7 @@ class GameState extends Equatable {
     this.botChoice = 0,
     this.isUserOut = false,
     this.isGameOver = false,
+    this.runsHistory = const [],
   });
 
   GameState copyWith({
@@ -24,6 +26,7 @@ class GameState extends Equatable {
     int? botChoice,
     bool? isUserOut,
     bool? isGameOver,
+    List<int>? runsHistory,
   }) {
     return GameState(
       userScore: userScore ?? this.userScore,
@@ -32,6 +35,7 @@ class GameState extends Equatable {
       botChoice: botChoice ?? this.botChoice,
       isUserOut: isUserOut ?? this.isUserOut,
       isGameOver: isGameOver ?? this.isGameOver,
+      runsHistory: runsHistory ?? this.runsHistory,
     );
   }
 
@@ -43,5 +47,6 @@ class GameState extends Equatable {
         botChoice,
         isUserOut,
         isGameOver,
+        runsHistory,
       ];
 }
