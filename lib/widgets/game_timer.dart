@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
 class GameTimer extends StatefulWidget {
@@ -15,62 +14,68 @@ class GameTimer extends StatefulWidget {
   State<GameTimer> createState() => _GameTimerState();
 }
 
-class _GameTimerState extends State<GameTimer> {
-  late Timer _timer;
-  int _currentSeconds = 0;
+class _GameTimerState extends State<GameTimer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    startTimer();
-  }
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: widget.durationInSeconds),
+    );
 
-  void startTimer() {
-    _currentSeconds = widget.durationInSeconds;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_currentSeconds > 0) {
-          _currentSeconds--;
-        } else {
-          _timer.cancel();
-          widget.onTimerComplete?.call();
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("Time's up!")));
-        }
-      });
+    _animation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(_controller);
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        widget.onTimerComplete?.call();
+      }
     });
+
+    _controller.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        SizedBox(
-          height: 60,
-          width: 60,
-          child: CircularProgressIndicator(
-            value: _currentSeconds / widget.durationInSeconds,
-            backgroundColor: Colors.grey[300],
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-            strokeWidth: 5,
-          ),
-        ),
-        Text(
-          '$_currentSeconds',
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ],
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              height: 60,
+              width: 60,
+              child: CircularProgressIndicator(
+                value: _animation.value,
+                backgroundColor: Colors.grey[300],
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                strokeWidth: 5,
+              ),
+            ),
+            Text(
+              '${(_animation.value * widget.durationInSeconds).ceil()}',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _controller.dispose();
     super.dispose();
   }
 }

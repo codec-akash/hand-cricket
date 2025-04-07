@@ -140,7 +140,8 @@ class _GameMainState extends State<GameMain> {
               SizedBox(height: 20.h),
               GameTimer(
                 onTimerComplete: () {
-                  debugPrint('Timer completed!');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Time's up!")));
                 },
               ),
               SizedBox(height: 20.h),
