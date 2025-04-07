@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hand_cricke/utils/image_path.dart';
 import 'package:hand_cricke/utils/image_provider.dart';
-import 'package:hand_cricke/widgets/game_card.dart';
 import 'package:hand_cricke/widgets/run_buttons.dart';
 import 'package:rive/rive.dart';
+import 'package:hand_cricke/widgets/game_timer.dart';
 
 class GameMain extends StatefulWidget {
   const GameMain({super.key});
@@ -40,7 +40,6 @@ class _GameMainState extends State<GameMain> {
         final input =
             controller.inputs.firstWhere((input) => input.name == 'Input');
         numberInputLeft = input as SMINumber;
-        debugPrint('Got numberInputLeft directly: ${numberInputLeft != null}');
       } catch (e) {
         debugPrint('Error getting left input: $e');
       }
@@ -58,14 +57,11 @@ class _GameMainState extends State<GameMain> {
         StateMachineController.fromArtboard(artboard, 'State Machine 1');
     if (controller != null) {
       artboard.addController(controller);
-
       // Try getting the input directly from inputs list
       try {
         final input =
             controller.inputs.firstWhere((input) => input.name == 'Input');
         numberInputRight = input as SMINumber;
-        debugPrint(
-            'Got numberInputRight directly: ${numberInputRight != null}');
       } catch (e) {
         debugPrint('Error getting right input: $e');
       }
@@ -80,18 +76,12 @@ class _GameMainState extends State<GameMain> {
 
   void updateNumber(int index) {
     if (!_isLeftInitialized || !_isRightInitialized) {
-      debugPrint('Controllers not fully initialized yet');
-      debugPrint('Left initialized: $_isLeftInitialized');
-      debugPrint('Right initialized: $_isRightInitialized');
       return;
     }
 
     int animationNumber = index + 1;
-    debugPrint('Updating animation number to: $animationNumber');
 
     if (numberInputLeft == null || numberInputRight == null) {
-      debugPrint('numberInputLeft: ${numberInputLeft != null}');
-      debugPrint('numberInputRight: ${numberInputRight != null}');
       return;
     }
 
@@ -111,9 +101,16 @@ class _GameMainState extends State<GameMain> {
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const GameCard(),
-              SizedBox(
-                height: 200.h,
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  image: const DecorationImage(
+                    image: AssetImage(ImagePath.background),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                height: 150.h,
+                width: 250.w,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -140,6 +137,13 @@ class _GameMainState extends State<GameMain> {
                   ],
                 ),
               ),
+              SizedBox(height: 20.h),
+              GameTimer(
+                onTimerComplete: () {
+                  debugPrint('Timer completed!');
+                },
+              ),
+              SizedBox(height: 20.h),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: GridView.builder(
