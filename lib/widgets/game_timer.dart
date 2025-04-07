@@ -5,10 +5,10 @@ class GameTimer extends StatefulWidget {
   final int durationInSeconds;
 
   const GameTimer({
-    Key? key,
+    super.key,
     this.onTimerComplete,
     this.durationInSeconds = 10,
-  }) : super(key: key);
+  });
 
   @override
   State<GameTimer> createState() => _GameTimerState();

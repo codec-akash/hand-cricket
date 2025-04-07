@@ -14,7 +14,7 @@ class GameBloc extends Bloc<GameEvent, GameBlocState> {
   }
 
   void _onGameStarted(GameStarted event, Emitter<GameBlocState> emit) {
-    emit(GameInProgress(const GameState()));
+    emit(const GameInProgress(GameState()));
   }
 
   void _onUserChoiceMade(UserChoiceMade event, Emitter<GameBlocState> emit) {
@@ -56,6 +56,6 @@ class GameBloc extends Bloc<GameEvent, GameBlocState> {
   }
 
   void _onGameReset(GameReset event, Emitter<GameBlocState> emit) {
-    emit(GameInProgress(const GameState()));
+    emit(const GameInProgress(GameState()));
   }
 }

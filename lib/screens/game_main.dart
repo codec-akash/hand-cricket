@@ -34,12 +34,19 @@ class _GameMainState extends State<GameMain> {
   SMINumber? numberInputRight;
   bool _isLeftInitialized = false;
   bool _isRightInitialized = false;
+  bool _timerResetKey = false;
+  bool _isUserTurn = true;
+  int _lastUserChoice = 0;
+  int _lastBotChoice = 0;
 
   @override
   void initState() {
     super.initState();
     _gameBloc = context.read<GameBloc>();
-    _gameBloc.add(const GameStarted());
+    // Delay game start slightly to give UI time to initialize
+    Future.microtask(() {
+      _gameBloc.add(const GameStarted());
+    });
   }
 
   void _onRiveInitLeft(Artboard artboard) {
@@ -85,16 +92,86 @@ class _GameMainState extends State<GameMain> {
     }
   }
 
+  void _updateAnimations(int userChoice, int botChoice) {
+    if (_isLeftInitialized && _isRightInitialized) {
+      // Force animation to play even if same value
+      if (_lastUserChoice == userChoice) {
+        numberInputLeft?.value = 0.0;
+        Future.microtask(() {
+          numberInputLeft?.value = userChoice.toDouble();
+        });
+      } else {
+        numberInputLeft?.value = userChoice.toDouble();
+      }
+
+      if (_lastBotChoice == botChoice) {
+        numberInputRight?.value = 0.0;
+        Future.microtask(() {
+          numberInputRight?.value = botChoice.toDouble();
+        });
+      } else {
+        numberInputRight?.value = botChoice.toDouble();
+      }
+
+      _lastUserChoice = userChoice;
+      _lastBotChoice = botChoice;
+    }
+  }
+
   void _onRunButtonTapped(int index) {
-    if (!_isLeftInitialized || !_isRightInitialized) {
+    if (!_isLeftInitialized || !_isRightInitialized || !_isUserTurn) {
       return;
     }
 
     // Add 1 to index to get the actual run value (1-6)
     int runValue = index + 1;
 
+    setState(() {
+      _timerResetKey = !_timerResetKey;
+      _isUserTurn = false;
+    });
+
     // Update the game state via BLoC
     _gameBloc.add(UserChoiceMade(runValue));
+
+    // Add a small delay before allowing the next play
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) {
+        setState(() {
+          _isUserTurn = true;
+        });
+      }
+    });
+  }
+
+  void _onTimerComplete() {
+    if (_isUserTurn) {
+      setState(() {
+        _isUserTurn = false;
+      });
+    }
+  }
+
+  void _resetGame() {
+    _lastUserChoice = 0;
+    _lastBotChoice = 0;
+
+    if (_isLeftInitialized && _isRightInitialized) {
+      numberInputLeft?.value = 0.0;
+      numberInputRight?.value = 0.0;
+    }
+
+    _gameBloc.add(const GameReset());
+
+    // Use a slight delay to ensure the game reset is processed before timer reset
+    Future.microtask(() {
+      if (mounted) {
+        setState(() {
+          _timerResetKey = !_timerResetKey;
+          _isUserTurn = true;
+        });
+      }
+    });
   }
 
   @override
@@ -105,6 +182,24 @@ class _GameMainState extends State<GameMain> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.outcomeMessage)),
           );
+        } else if (state is GameInProgress &&
+            state.gameState.ballsPlayed > 0 &&
+            _isUserTurn) {
+          // Reset timer for new ball
+          setState(() {
+            _timerResetKey = !_timerResetKey;
+          });
+        }
+
+        // Update animations based on state changes
+        if ((state is GameInProgress || state is GameOutcome) && !_isUserTurn) {
+          final gameState = state is GameInProgress
+              ? state.gameState
+              : (state as GameOutcome).gameState;
+
+          if (gameState.userChoice != 0) {
+            _updateAnimations(gameState.userChoice, gameState.botChoice);
+          }
         }
       },
       child: Scaffold(
@@ -123,16 +218,6 @@ class _GameMainState extends State<GameMain> {
                       final gameState = state is GameInProgress
                           ? state.gameState
                           : (state as GameOutcome).gameState;
-
-                      // Update the Rive animations
-                      if (_isLeftInitialized &&
-                          _isRightInitialized &&
-                          gameState.userChoice != 0) {
-                        numberInputLeft?.value =
-                            gameState.userChoice.toDouble();
-                        numberInputRight?.value =
-                            gameState.botChoice.toDouble();
-                      }
 
                       return Column(
                         children: [
@@ -181,9 +266,9 @@ class _GameMainState extends State<GameMain> {
                                 Expanded(
                                   child: Column(
                                     children: [
-                                      const Text(
-                                        'Bot',
-                                        style: TextStyle(
+                                      Text(
+                                        'Bot: ${gameState.botChoice}',
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -206,13 +291,28 @@ class _GameMainState extends State<GameMain> {
                             ),
                           ),
                           SizedBox(height: 10.h),
-                          Text(
-                            'Balls: ${gameState.ballsPlayed}/6',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Balls: ${gameState.ballsPlayed}/6',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 20.w),
+                              if (gameState.isUserOut)
+                                const Text(
+                                  'OUT!',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       );
@@ -258,11 +358,11 @@ class _GameMainState extends State<GameMain> {
                   },
                 ),
                 SizedBox(height: 20.h),
-                GameTimer(
-                  durationInSeconds: 20,
-                  onTimerComplete: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Time's up!")),
+                BlocBuilder<GameBloc, GameBlocState>(
+                  builder: (context, state) {
+                    return GameTimer(
+                      durationInSeconds: 10,
+                      onTimerComplete: _onTimerComplete,
                     );
                   },
                 ),
@@ -285,7 +385,7 @@ class _GameMainState extends State<GameMain> {
                             ),
                             itemBuilder: (context, index) => RunButtons(
                               run: runList[index],
-                              onTap: isGameOver
+                              onTap: (isGameOver || !_isUserTurn)
                                   ? null
                                   : () => _onRunButtonTapped(index),
                             ),
@@ -297,7 +397,7 @@ class _GameMainState extends State<GameMain> {
                         if (isGameOver) ...[
                           SizedBox(height: 20.h),
                           ElevatedButton(
-                            onPressed: () => _gameBloc.add(const GameReset()),
+                            onPressed: _resetGame,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
                               padding: EdgeInsets.symmetric(
