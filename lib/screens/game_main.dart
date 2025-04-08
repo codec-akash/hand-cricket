@@ -50,6 +50,10 @@ class _GameMainState extends State<GameMain> {
     _gameBloc = context.read<GameBloc>();
     // Delay game start slightly to give UI time to initialize
     Future.microtask(() {
+      _overlayService.showGameEventOverlay(
+        context,
+        GameEventType.battingStarted,
+      );
       _gameBloc.add(const GameStarted());
     });
   }
@@ -241,6 +245,26 @@ class _GameMainState extends State<GameMain> {
             _updateAnimations(gameState.userChoice, gameState.botChoice);
           }
         }
+
+        if (state is GameInProgress || state is GameOutcome) {
+          final gameState = state is GameInProgress
+              ? state.gameState
+              : (state as GameOutcome).gameState;
+
+          if (gameState.isGameOver) {
+            _overlayService.showGameEventOverlay(
+              context,
+              GameEventType.battingEnded,
+              child: Text(
+                "${gameState.userScore}",
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            );
+          }
+        }
       },
       child: Scaffold(
         body: Stack(
@@ -342,29 +366,6 @@ class _GameMainState extends State<GameMain> {
                             ),
                           ),
                           SizedBox(height: 10.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Balls: ${gameState.ballsPlayed}/6',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(width: 20.w),
-                              if (gameState.isUserOut)
-                                const Text(
-                                  'OUT!',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                            ],
-                          ),
                         ],
                       );
                     } else {

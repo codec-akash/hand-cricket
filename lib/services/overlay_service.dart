@@ -12,8 +12,9 @@ class OverlayService {
   // Display a game event overlay
   void showGameEventOverlay(
     BuildContext context,
-    GameEventType eventType,
-  ) {
+    GameEventType eventType, {
+    Widget? child,
+  }) {
     // Remove any existing overlay
     hideCurrentOverlay();
 
@@ -22,6 +23,7 @@ class OverlayService {
       builder: (context) => GameEventOverlay(
         eventType: eventType,
         onDismissed: hideCurrentOverlay,
+        child: child,
       ),
     );
 

@@ -4,19 +4,23 @@ import 'package:hand_cricke/utils/image_path.dart';
 import 'package:hand_cricke/utils/image_provider.dart';
 
 enum GameEventType {
+  battingStarted,
   sixer,
   wicket,
+  battingEnded,
 }
 
 class GameEventOverlay extends StatefulWidget {
   final GameEventType eventType;
   final VoidCallback? onDismissed;
+  final Widget? child;
   final Duration displayDuration;
 
   const GameEventOverlay({
     super.key,
     required this.eventType,
     this.onDismissed,
+    this.child,
     this.displayDuration = const Duration(seconds: 1),
   });
 
@@ -65,7 +69,7 @@ class _GameEventOverlayState extends State<GameEventOverlay>
     return FadeTransition(
       opacity: _animation,
       child: Container(
-        color: Colors.black.withOpacity(0.5),
+        color: Colors.black.withOpacity(0.8),
         child: Center(
           child: _buildEventContent(),
         ),
@@ -76,34 +80,29 @@ class _GameEventOverlayState extends State<GameEventOverlay>
   Widget _buildEventContent() {
     switch (widget.eventType) {
       case GameEventType.sixer:
-        return _buildSixerContent();
+        return _buildGameEventDetail(ImagePath.sixerImage);
       case GameEventType.wicket:
-        return _buildWicketContent();
+        return _buildGameEventDetail(ImagePath.outImage);
+      case GameEventType.battingStarted:
+        return _buildGameEventDetail(ImagePath.batting);
+      case GameEventType.battingEnded:
+        return _buildGameEventDetail(ImagePath.gameDefendImage);
     }
   }
 
-  Widget _buildSixerContent() {
-    return Stack(
-      alignment: Alignment.center,
+  Widget _buildGameEventDetail(String imagePath) {
+    return Column(
+      // alignment: Alignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ImageWidget.getImage(
-          ImagePath.sixerImage,
+          imagePath,
           height: 200.h,
           width: 200.w,
         ),
-      ],
-    );
-  }
-
-  Widget _buildWicketContent() {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        ImageWidget.getImage(
-          ImagePath.wicketBackground,
-          height: 200.h,
-          width: 200.w,
-        ),
+        if (widget.child != null) ...[
+          widget.child!,
+        ]
       ],
     );
   }

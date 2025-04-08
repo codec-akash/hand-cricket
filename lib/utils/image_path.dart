@@ -8,8 +8,9 @@ class ImagePath {
   static const String six = 'assets/images/six.png';
   static const String ball = 'assets/images/ball.png';
   static const String sixerImage = 'assets/images/sixer.png';
-  static const String sixerBackground = 'assets/images/sixer.png';
-  static const String wicketBackground = 'assets/images/out.png';
+  static const String outImage = 'assets/images/out.png';
+  static const String batting = 'assets/images/batting.png';
+  static const String gameDefendImage = 'assets/images/game_defend.webp';
 }
 
 class RivePath {
