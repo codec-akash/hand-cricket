@@ -152,9 +152,18 @@ class _GameMainState extends State<GameMain> {
 
   void _onTimerComplete() {
     if (_isUserTurn) {
+      // User failed to make a choice in time, end the game
+      _gameBloc.add(const TimerExpired());
+
       setState(() {
         _isUserTurn = false;
       });
+
+      // Show the "OUT!" overlay when timer expires
+      _overlayService.showGameEventOverlay(
+        context,
+        GameEventType.wicket,
+      );
     }
   }
 

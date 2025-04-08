@@ -20,6 +20,10 @@ class UserChoiceMade extends GameEvent {
   List<Object?> get props => [userChoice];
 }
 
+class TimerExpired extends GameEvent {
+  const TimerExpired();
+}
+
 class GameReset extends GameEvent {
   const GameReset();
 }

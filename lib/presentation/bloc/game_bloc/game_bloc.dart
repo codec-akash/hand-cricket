@@ -10,6 +10,7 @@ class GameBloc extends Bloc<GameEvent, GameBlocState> {
   GameBloc(this._gameRepository) : super(const GameInitial()) {
     on<GameStarted>(_onGameStarted);
     on<UserChoiceMade>(_onUserChoiceMade);
+    on<TimerExpired>(_onTimerExpired);
     on<GameReset>(_onGameReset);
   }
 
@@ -60,6 +61,28 @@ class GameBloc extends Bloc<GameEvent, GameBlocState> {
       }
       emit(GameOutcome(updatedState, outcomeMessage));
     }
+  }
+
+  void _onTimerExpired(TimerExpired event, Emitter<GameBlocState> emit) {
+    if (state is! GameInProgress) return;
+
+    final currentState = (state as GameInProgress).gameState;
+    if (currentState.isGameOver) return;
+
+    // Create a new state with isUserOut and isGameOver set to true
+    final updatedState = currentState.copyWith(
+      isUserOut: true,
+      isGameOver: true,
+    );
+
+    // First emit the updated in-progress state
+    emit(GameInProgress(updatedState));
+
+    // Then emit the game outcome state
+    emit(GameOutcome(
+      updatedState,
+      'Time Up! Final Score: ${updatedState.userScore}',
+    ));
   }
 
   void _onGameReset(GameReset event, Emitter<GameBlocState> emit) {
