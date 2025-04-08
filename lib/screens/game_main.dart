@@ -140,6 +140,7 @@ class _GameMainState extends State<GameMain> {
       if (mounted) {
         setState(() {
           _isUserTurn = true;
+          _timerResetKey = !_timerResetKey; // Reset timer for next ball
         });
       }
     });
@@ -365,6 +366,7 @@ class _GameMainState extends State<GameMain> {
                     return GameTimer(
                       durationInSeconds: 10,
                       onTimerComplete: _onTimerComplete,
+                      shouldReset: _timerResetKey,
                     );
                   },
                 ),

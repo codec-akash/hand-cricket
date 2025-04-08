@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class GameTimer extends StatefulWidget {
   final VoidCallback? onTimerComplete;
   final int durationInSeconds;
+  final bool shouldReset;
 
   const GameTimer({
     super.key,
     this.onTimerComplete,
     this.durationInSeconds = 10,
+    this.shouldReset = false,
   });
 
   @override
@@ -18,10 +20,15 @@ class _GameTimerState extends State<GameTimer>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeAnimation();
+  }
+
+  void _initializeAnimation() {
     _controller = AnimationController(
       vsync: this,
       duration: Duration(seconds: widget.durationInSeconds),
@@ -39,6 +46,33 @@ class _GameTimerState extends State<GameTimer>
     });
 
     _controller.forward();
+  }
+
+  void resetTimer() {
+    _controller.reset();
+    _controller.forward();
+  }
+
+  void pauseTimer() {
+    if (!_isPaused) {
+      _controller.stop();
+      _isPaused = true;
+    }
+  }
+
+  void resumeTimer() {
+    if (_isPaused) {
+      _controller.forward();
+      _isPaused = false;
+    }
+  }
+
+  @override
+  void didUpdateWidget(GameTimer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shouldReset != oldWidget.shouldReset && widget.shouldReset) {
+      resetTimer();
+    }
   }
 
   @override
