@@ -1,16 +1,28 @@
-# hand_cricke
+# Hand Cricket Game
 
-A new Flutter project.
+This project is a simple hand cricket game built using Flutter.
 
-## Getting Started
+## Project Details
 
-This project is a starting point for a Flutter application.
+- **Flutter Version**: 3.24.5 (Channel: stable)
+- **Dart Version**: 3.5.4
+- **DevTools Version**: 2.37.3
 
-A few resources to get you started if this is your first Flutter project:
+## Building the Project
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+To build the APK for this project, use the following command:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter build apk
+```
+
+## Game Overview
+
+- The game is designed for the user to bat.
+- The defending logic has not yet been added to the game.
+
+## Features
+
+- User can select runs to score.
+- Timer functionality to limit user selection time.
+- Overlay notifications for game events (e.g., sixes and wickets).
