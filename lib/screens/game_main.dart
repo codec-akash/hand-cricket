@@ -10,6 +10,8 @@ import 'package:hand_cricke/widgets/run_buttons.dart';
 import 'package:hand_cricke/widgets/score_card.dart';
 import 'package:rive/rive.dart';
 import 'package:hand_cricke/widgets/game_timer.dart';
+import 'package:hand_cricke/services/overlay_service.dart';
+import 'package:hand_cricke/widgets/game_event_overlay.dart';
 
 class GameMain extends StatefulWidget {
   const GameMain({super.key});
@@ -39,6 +41,8 @@ class _GameMainState extends State<GameMain> {
   bool _isUserTurn = true;
   int _lastUserChoice = 0;
   int _lastBotChoice = 0;
+
+  final OverlayService _overlayService = OverlayService();
 
   @override
   void initState() {
@@ -191,6 +195,31 @@ class _GameMainState extends State<GameMain> {
           setState(() {
             _timerResetKey = !_timerResetKey;
           });
+        }
+
+        // Check for wicket or six events
+        if (state is GameInProgress || state is GameOutcome) {
+          final gameState = state is GameInProgress
+              ? state.gameState
+              : (state as GameOutcome).gameState;
+
+          // Only process if this isn't the initial state and we have user/bot choices
+          if (gameState.userChoice != 0 && gameState.botChoice != 0) {
+            // Check for wicket first (higher priority)
+            if (gameState.isUserOut) {
+              _overlayService.showGameEventOverlay(
+                context,
+                GameEventType.wicket,
+              );
+            }
+            // Only show six overlay if NOT a wicket and user chose 6
+            else if (gameState.userChoice == 6) {
+              _overlayService.showGameEventOverlay(
+                context,
+                GameEventType.sixer,
+              );
+            }
+          }
         }
 
         // Update animations based on state changes
