@@ -224,6 +224,16 @@ class _GameMainState extends State<GameMain> {
                       return Column(
                         children: [
                           ScoreCard(runsHistory: gameState.runsHistory),
+                          Center(
+                            child: Text(
+                              "To win: ${gameState.userScore}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(color: Colors.white),
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
@@ -240,14 +250,14 @@ class _GameMainState extends State<GameMain> {
                                 Expanded(
                                   child: Column(
                                     children: [
-                                      Text(
-                                        'User: ${gameState.userScore}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                                      // Text(
+                                      //   'User: ${gameState.userScore}',
+                                      //   style: const TextStyle(
+                                      //     fontSize: 16,
+                                      //     fontWeight: FontWeight.bold,
+                                      //     color: Colors.white,
+                                      //   ),
+                                      // ),
                                       Expanded(
                                         child: Transform(
                                           alignment: Alignment.center,
@@ -269,14 +279,14 @@ class _GameMainState extends State<GameMain> {
                                 Expanded(
                                   child: Column(
                                     children: [
-                                      Text(
-                                        'Bot: ${gameState.botChoice}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
+                                      // Text(
+                                      //   'Bot: ${gameState.botChoice}',
+                                      //   style: const TextStyle(
+                                      //     fontSize: 16,
+                                      //     fontWeight: FontWeight.bold,
+                                      //     color: Colors.white,
+                                      //   ),
+                                      // ),
                                       Expanded(
                                         child: RiveAnimation.asset(
                                           RivePath.handCricket,
@@ -363,10 +373,16 @@ class _GameMainState extends State<GameMain> {
                 SizedBox(height: 20.h),
                 BlocBuilder<GameBloc, GameBlocState>(
                   builder: (context, state) {
+                    final bool isGameOver = state is GameOutcome ||
+                        (state is GameInProgress && state.gameState.isGameOver);
+                    final bool isLastBall = state is GameInProgress &&
+                        state.gameState.ballsPlayed >= 6;
+
                     return GameTimer(
                       durationInSeconds: 10,
                       onTimerComplete: _onTimerComplete,
                       shouldReset: _timerResetKey,
+                      isVisible: !isGameOver && !isLastBall,
                     );
                   },
                 ),
@@ -418,7 +434,7 @@ class _GameMainState extends State<GameMain> {
                     );
                   },
                 ),
-                SizedBox(height: 40.h),
+                SizedBox(height: 20.h),
               ],
             ),
           ],

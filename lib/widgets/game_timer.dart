@@ -4,12 +4,14 @@ class GameTimer extends StatefulWidget {
   final VoidCallback? onTimerComplete;
   final int durationInSeconds;
   final bool shouldReset;
+  final bool isVisible;
 
   const GameTimer({
     super.key,
     this.onTimerComplete,
     this.durationInSeconds = 10,
     this.shouldReset = false,
+    this.isVisible = true,
   });
 
   @override
@@ -45,12 +47,16 @@ class _GameTimerState extends State<GameTimer>
       }
     });
 
-    _controller.forward();
+    if (widget.isVisible) {
+      _controller.forward();
+    }
   }
 
   void resetTimer() {
     _controller.reset();
-    _controller.forward();
+    if (widget.isVisible) {
+      _controller.forward();
+    }
   }
 
   void pauseTimer() {
@@ -73,10 +79,21 @@ class _GameTimerState extends State<GameTimer>
     if (widget.shouldReset != oldWidget.shouldReset && widget.shouldReset) {
       resetTimer();
     }
+    if (widget.isVisible != oldWidget.isVisible) {
+      if (widget.isVisible) {
+        _controller.forward();
+      } else {
+        _controller.stop();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.isVisible) {
+      return const SizedBox.shrink();
+    }
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
